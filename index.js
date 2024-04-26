@@ -5,6 +5,12 @@ canvas.width = innerWidth
 canvas.height = innerHeight
 const ctx = canvas.getContext('2d')
 
+// window.onresize = () => {
+//   canvas.width = innerWidth
+// canvas.height = innerHeight
+
+// }
+
 newGame() 
 
 function newGame() {
@@ -25,10 +31,10 @@ function newGame() {
 
   //draws BG buildings
   for (let i = 0; i < 11; i++) {
-    generateBackgroundBuilding(i)
+    generateBackgroundBuildingCoords(i)
   }
   for (let i = 0; i < 8; i++) {
-    generateBuilding(i)
+    generateBuildingCoords(i)
   }
 
   initBombPosition()
@@ -52,11 +58,47 @@ function draw() {
   ctx.restore()
 }
 
-function generateBackgroundBuilding() {}
-function generateBuilding(){}
+function generateBackgroundBuildingCoords(index) {
+  const prevBldg = state.backgroundBuildings[index - 1]
+  const x = prevBldg ? 
+            prevBldg.x + prevBldg.width + 4 :
+            -30
+  const minWidth = 60
+  const maxWidth = 110
+  const width = minWidth + Math.random() * (maxWidth-minWidth)
+
+  const minHeight = 80
+  const maxHeight = 350
+  const height = minHeight + Math.random()*(maxHeight-minHeight)
+
+  state.backgroundBuildings.push({x,width,height})
+}
+function generateBuildingCoords(){}
 function initBombPosition(){}
-function drawBackground(){}
-function drawBackgroundBuildings(){}
+
+function drawBackground(){
+  const gradient = ctx.createLinearGradient(0,0,0,window.innerHeight)
+  gradient.addColorStop(1,'#F8BA85')
+  gradient.addColorStop(0,'#FFC28E')
+
+  //draw sky
+  ctx.fillStyle = gradient
+  ctx.fillRect(0,0,innerWidth,innerHeight)
+
+  //Draw moon as circle
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'
+  ctx.beginPath()
+  ctx.arc(300,350, 60,0, 2*Math.PI)
+  ctx.fill()
+}
+
+function drawBackgroundBuildings(){
+  state.backgroundBuildings.forEach(bldg => {
+    const randomColor = "#000000".replace(/0/g,() =>  (~~(Math.random()*16)).toString(16))
+     ctx.fillStyle = randomColor
+     ctx.fillRect(bldg.x, 0, bldg.width, bldg.height)
+  });
+}
 function drawBuildings(){}
 function drawGorilla(playerNumber) {}
 function drawBomb() {}
