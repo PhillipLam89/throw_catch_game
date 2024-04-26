@@ -94,7 +94,8 @@ function drawBackground(){
 
 function drawBackgroundBuildings(){
   state.backgroundBuildings.forEach(bldg => {
-    const randomColor = "#000000".replace(/0/g,() =>  (~~(Math.random()*16)).toString(16))
+
+    const randomColor = "#000000".replaceAll('0',() =>  (~~(Math.random()*16)).toString(16))
      ctx.fillStyle = randomColor
      ctx.fillRect(bldg.x, 0, bldg.width, bldg.height)
   });
