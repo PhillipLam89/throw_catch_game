@@ -59,6 +59,7 @@ function draw() {
 }
 
 function generateBackgroundBuildingCoords(index) {
+  //background bldgs are painted BEFORE main buildings AND have NO windows
   const prevBldg = state.backgroundBuildings[index - 1]
   const x = prevBldg ? 
             prevBldg.x + prevBldg.width + 4 :
@@ -73,7 +74,31 @@ function generateBackgroundBuildingCoords(index) {
 
   state.backgroundBuildings.push({x,width,height})
 }
-function generateBuildingCoords(){}
+function generateBuildingCoords(index){
+  const prevBldg = state.buildings[index - 1]
+  const x = prevBldg ? 
+            prevBldg.x + prevBldg.width + 4 :
+            0
+  const minWidth = 80
+  const maxWidth = 130
+  const width = minWidth + Math.random() * (maxWidth-minWidth)
+
+  const gorillaStandsOnThisBldg = index === 1 || index === 6
+
+  const minHeight = 4
+  const maxHeight = 300
+  const minHeightGorilla = 30
+  const maxHeightGorilla = 150
+
+  const height =  gorillaStandsOnThisBldg 
+                  ? 
+                  minHeightGorilla + Math.random() * (maxHeightGorilla - minHeightGorilla) 
+                  :
+                  minHeight + Math.random() * (maxHeight - minHeight)
+
+    
+  state.buildings.push({x,width,height, lightsOn})
+}
 function initBombPosition(){}
 
 function drawBackground(){
@@ -95,7 +120,7 @@ function drawBackground(){
 function drawBackgroundBuildings(){
   state.backgroundBuildings.forEach(bldg => {
 
-    const randomColor = "#000000".replaceAll('0',() =>  (~~(Math.random()*16)).toString(16))
+    const randomColor = "#000000".replaceAll(/0/g,() =>  (~~(Math.random()*16)).toString(16))
      ctx.fillStyle = randomColor
      ctx.fillRect(bldg.x, 0, bldg.width, bldg.height)
   });
