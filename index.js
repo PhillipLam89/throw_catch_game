@@ -3,6 +3,7 @@ let state = {}
 const canvas = document.getElementById('game')
 canvas.width = innerWidth
 canvas.height = innerHeight
+
 const ctx = canvas.getContext('2d')
 
 // window.onresize = () => {
