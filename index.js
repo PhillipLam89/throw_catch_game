@@ -42,6 +42,7 @@ function newGame() {
   draw()
 }
 
+//note calling newGame also calls draw func
 function draw() {
   ctx.save()
   ctx.translate(0, window.innerHeight)
@@ -56,9 +57,41 @@ function draw() {
   drawBomb()
 
   ctx.restore()
-  console.log(state.buildings)
-}
 
+}
+function drawGorilla(player) {
+  ctx.save()
+  const building = player === 1 
+  ? state.buildings.at(1) 
+  :
+  state.buildings.at(-2) //using .at allows us to easily select 2nd last building
+  ctx.translate(building.x + building.width / 2, building.height) //moves coord system to the middle of the building to start drawing gorilla
+
+  drawGorillaBody()
+  // drawGorillaLeftArm(player)
+  // drawGorillaRightArm(player)
+  // drawGorillaFace(player)
+
+  ctx.restore()
+}
+function drawGorillaBody() {
+  ctx.fillStyle = 'black'
+  ctx.beginPath()
+  ctx.moveTo(0,15)
+  ctx.lineTo(-7,0)
+  ctx.lineTo(-20,0)
+  ctx.lineTo(-17,18)
+  ctx.lineTo(-20,44)
+  ctx.lineTo(-11,77)
+  ctx.lineTo(0,84)
+  ctx.lineTo(11,77)
+  ctx.lineTo(20,44)
+  ctx.lineTo(17,18)
+  ctx.lineTo(20,0)
+  ctx.lineTo(7,0)
+  ctx.fill()
+  
+}
 function generateBackgroundBuildingCoords(index) {
   //background bldgs are painted BEFORE main buildings AND have NO windows
   const prevBldg = state.backgroundBuildings[index - 1]
@@ -161,5 +194,5 @@ function drawBuildings(){
 
   });  
 }
-function drawGorilla(playerNumber) {}
+
 function drawBomb() {}
