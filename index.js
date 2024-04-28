@@ -56,6 +56,7 @@ function draw() {
   drawBomb()
 
   ctx.restore()
+  console.log(state.buildings)
 }
 
 function generateBackgroundBuildingCoords(index) {
@@ -96,7 +97,8 @@ function generateBuildingCoords(index){
                   :
                   minHeight + Math.random() * (maxHeight - minHeight)
 
-    
+    const lightsOn = Array(50).fill('').map(bool => Math.random() <= 0.33 ? true : false)
+
   state.buildings.push({x,width,height, lightsOn})
 }
 function initBombPosition(){}
@@ -120,11 +122,44 @@ function drawBackground(){
 function drawBackgroundBuildings(){
   state.backgroundBuildings.forEach(bldg => {
 
-    const randomColor = "#000000".replaceAll(/0/g,() =>  (~~(Math.random()*16)).toString(16))
-     ctx.fillStyle = randomColor
+    const randomColor = "#000000".replaceAll(0,() =>  (~~(Math.random()*16)).toString(16))
+     ctx.fillStyle = 'red'
      ctx.fillRect(bldg.x, 0, bldg.width, bldg.height)
   });
 }
-function drawBuildings(){}
+function drawBuildings(){
+  state.buildings.forEach(bldg => {  
+     ctx.fillStyle = "#4A3C68"
+     ctx.fillRect(bldg.x, 0, bldg.width, bldg.height)
+
+     //handle windows drawing
+     const windowWidth = 10
+     const windowHeight = 12
+     const gap = 15
+     // we can figure out how many floors & rooms each random building has below
+     const numberOfFloors = Math.ceil(bldg.height - gap / (windowHeight + gap) ) //this caculates how TALL a bldg is then divided by the height of the room (windowHeight + gap) to get the # of floors
+     const numberOfRoomsPerFloor = Math.floor( (bldg.width - gap) / (windowWidth + gap))
+
+
+     for (let floor = 0; floor < numberOfFloors; floor++) {
+      for (let room = 0; room < numberOfRoomsPerFloor; room++) {
+          if (bldg.lightsOn[floor * numberOfRoomsPerFloor + room]) {
+            ctx.save()
+            ctx.translate(bldg.x + gap, bldg.height - gap)
+            ctx.scale(1,-1)
+
+            const x = room * (windowWidth + gap)
+            const y = floor * (windowHeight + gap)
+
+            ctx.fillStyle = 'red'
+            ctx.fillRect(x,y,windowWidth,windowHeight)
+
+            ctx.restore()
+          }
+      }  
+     }
+
+  });  
+}
 function drawGorilla(playerNumber) {}
 function drawBomb() {}
