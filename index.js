@@ -124,7 +124,44 @@ function drawGorillaArms(player) {
 }
 
 function drawGorillaFace(player) {
+    //face
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.arc(0,63,9,0,2*Math.PI)
+    ctx.moveTo(-3.5,70)
+    ctx.arc(-3.5,70,4,0,2*Math.PI)
+    ctx.moveTo(3.5,70)
+    ctx.arc(3.5,70,4,0,2*Math.PI)
+    ctx.fill()
+    // eyes
+
+    ctx.fillStyle = 'blue'
+    ctx.beginPath()
+    ctx.arc(-3.5,70,2,0,2*Math.PI)
+    ctx.moveTo(3.5,70)
+    ctx.arc(3.5,70,2,0,2*Math.PI)
+    ctx.fill()
+    //nose
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 1.4
+    ctx.beginPath()
+    ctx.moveTo(-3.5,66.5)
+    ctx.lineTo(-1.5,65)
+    ctx.moveTo(3.5, 66.5)
+    ctx.lineTo(1.5,65)
+    ctx.stroke()
+    
+    //mouth
+    ctx.beginPath()
+    ctx.strokeStyle = 'purple'
+    ctx.lineWidth = 3
   
+    const isCelebrating = state.phase == 'celebrating' && state.currentPlayer == player
+
+    ctx.arc(0,isCelebrating ? 60 : 57, 2.5,0,Math.PI, isCelebrating ? true : false)
+    // ctx.quadraticCurveTo(0,60,10,50)
+  
+    ctx.stroke()
 }
 
 function generateBackgroundBuildingCoords(index) {
