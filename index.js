@@ -3,6 +3,7 @@ let state = {}
 const canvas = document.getElementById('game')
 canvas.width = innerWidth
 canvas.height = innerHeight
+
 const ctx = canvas.getContext('2d')
 
 // window.onresize = () => {
@@ -42,6 +43,7 @@ function newGame() {
   draw()
 }
 
+//note calling newGame also calls draw func
 function draw() {
   ctx.save()
   ctx.translate(0, window.innerHeight)
@@ -56,7 +58,73 @@ function draw() {
   drawBomb()
 
   ctx.restore()
-  console.log(state.buildings)
+
+}
+function drawGorilla(player) {
+  ctx.save()
+  const building = player === 1 
+  ? state.buildings.at(1) 
+  :
+  state.buildings.at(-2) //using .at allows us to easily select 2nd last building
+  ctx.translate(building.x + building.width / 2, building.height) //moves coord system to the middle of the building to start drawing gorilla
+
+  drawGorillaBody()
+  drawGorillaArms(player)
+  // drawGorillaLeftArm(player)
+  // drawGorillaRightArm(player)
+  drawGorillaFace(player)
+
+  ctx.restore()
+}
+function drawGorillaBody() {
+  ctx.fillStyle = 'black'
+  ctx.beginPath()
+  ctx.moveTo(0,15)
+  ctx.lineTo(-7,0)
+  ctx.lineTo(-20,0)
+  ctx.lineTo(-17,18)
+  ctx.lineTo(-20,44)
+  ctx.lineTo(-11,77)
+  ctx.lineTo(0,84)
+  ctx.lineTo(11,77)
+  ctx.lineTo(20,44)
+  ctx.lineTo(17,18)
+  ctx.lineTo(20,0)
+  ctx.lineTo(7,0)
+  ctx.fill()
+  
+}
+
+function drawGorillaArms(player) {
+  ctx.strokeStyle = 'black'
+  ctx.lineWidth = 18
+  ctx.beginPath()
+ 
+  ctx.moveTo(-14,50) //left arm
+
+  const isAiming = state.phase === 'aiming'
+  const isCelebrating = state.phase == 'celebrating'
+  const currentPlayerOne = state.currentPlayer == 1
+
+  if (isAiming && currentPlayerOne && player == 1) {
+    ctx.quadraticCurveTo(-44,63,-28,107)
+  }else if (isCelebrating && currentPlayerOne == player) {
+    ctx.quadraticCurveTo(-44,63,-28,107)
+  } else ctx.quadraticCurveTo(-44,45,-28,12)
+  ctx.stroke()
+
+
+  ctx.moveTo(14,50) //right arm
+  if (isAiming && state.currentPlayer == 2 && player == 2) {
+    ctx.quadraticCurveTo(44,63,28,107)
+  }else if (isCelebrating && state.currentPlayer == player) {
+    ctx.quadraticCurveTo(44,63,28,107)
+  } else ctx.quadraticCurveTo(44,45,28,12)
+  ctx.stroke()
+}
+
+function drawGorillaFace(player) {
+  
 }
 
 function generateBackgroundBuildingCoords(index) {
@@ -69,7 +137,7 @@ function generateBackgroundBuildingCoords(index) {
   const maxWidth = 110
   const width = minWidth + Math.random() * (maxWidth-minWidth)
 
-  const minHeight = 80
+  const minHeight = 95
   const maxHeight = 350
   const height = minHeight + Math.random()*(maxHeight-minHeight)
 
@@ -86,7 +154,7 @@ function generateBuildingCoords(index){
 
   const gorillaStandsOnThisBldg = index === 1 || index === 6
 
-  const minHeight = 4
+  const minHeight = 45
   const maxHeight = 300
   const minHeightGorilla = 30
   const maxHeightGorilla = 150
@@ -115,7 +183,7 @@ function drawBackground(){
   //Draw moon as circle
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
   ctx.beginPath()
-  ctx.arc(300,350, 60,0, 2*Math.PI)
+  ctx.arc(canvas.width * .25,canvas.height * .75, 60,0, 2*Math.PI)
   ctx.fill()
 }
 
@@ -123,7 +191,7 @@ function drawBackgroundBuildings(){
   state.backgroundBuildings.forEach(bldg => {
 
     const randomColor = "#000000".replaceAll(0,() =>  (~~(Math.random()*16)).toString(16))
-     ctx.fillStyle = 'red'
+     ctx.fillStyle = 'grey'
      ctx.fillRect(bldg.x, 0, bldg.width, bldg.height)
   });
 }
@@ -161,5 +229,5 @@ function drawBuildings(){
 
   });  
 }
-function drawGorilla(playerNumber) {}
+
 function drawBomb() {}
