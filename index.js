@@ -104,11 +104,11 @@ function drawGorillaArms(player) {
 
   const isAiming = state.phase === 'aiming'
   const isCelebrating = state.phase == 'celebrating'
-  const currentPlayerOne = state.currentPlayer == 1
+  const currentPlayerOne = state.currentPlayer == player
 
   if (isAiming && currentPlayerOne && player == 1) {
     ctx.quadraticCurveTo(-44,63,-28,107)
-  }else if (isCelebrating && currentPlayerOne == player) {
+  }else if (isCelebrating && currentPlayerOne) {
     ctx.quadraticCurveTo(-44,63,-28,107)
   } else ctx.quadraticCurveTo(-44,45,-28,12)
   ctx.stroke()
@@ -153,10 +153,11 @@ function drawGorillaFace(player) {
     
     //mouth
     ctx.beginPath()
-    ctx.strokeStyle = 'purple'
-    ctx.lineWidth = 3
-  
     const isCelebrating = state.phase == 'celebrating' && state.currentPlayer == player
+    ctx.strokeStyle = isCelebrating ? 'red' : 'purple'
+    ctx.lineWidth = 1
+  
+    
 
     ctx.arc(0,isCelebrating ? 60 : 57, 2.5,0,Math.PI, isCelebrating ? true : false)
     // ctx.quadraticCurveTo(0,60,10,50)
@@ -256,7 +257,7 @@ function drawBuildings(){
             const x = room * (windowWidth + gap)
             const y = floor * (windowHeight + gap)
 
-            ctx.fillStyle = 'red'
+            ctx.fillStyle = 'white'
             ctx.fillRect(x,y,windowWidth,windowHeight)
 
             ctx.restore()
