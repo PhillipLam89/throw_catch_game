@@ -6,11 +6,7 @@ canvas.height = innerHeight
 
 const ctx = canvas.getContext('2d')
 
-// window.onresize = () => {
-//   canvas.width = innerWidth
-// canvas.height = innerHeight
 
-// }
 
 newGame() 
 
@@ -27,7 +23,8 @@ function newGame() {
   
     backgroundBuildings: [],
     buildings: [],
-    blastHoles: []
+    blastHoles: [],
+    scale: 1
   }
 
   //draws BG buildings
@@ -37,13 +34,18 @@ function newGame() {
   for (let i = 0; i < 8; i++) {
     generateBuildingCoords(i)
   }
-
+  calculateScale()
   initBombPosition()
 
   draw()
 }
 
 //note calling newGame also calls draw func
+
+function calculateScale() {
+  
+}
+
 function draw() {
   ctx.save()
   ctx.translate(0, window.innerHeight)
@@ -104,11 +106,11 @@ function drawGorillaArms(player) {
 
   const isAiming = state.phase === 'aiming'
   const isCelebrating = state.phase == 'celebrating'
-  const currentPlayerOne = state.currentPlayer == 1
+  const currentPlayerOne = state.currentPlayer == player
 
   if (isAiming && currentPlayerOne && player == 1) {
     ctx.quadraticCurveTo(-44,63,-28,107)
-  }else if (isCelebrating && currentPlayerOne == player) {
+  }else if (isCelebrating && currentPlayerOne) {
     ctx.quadraticCurveTo(-44,63,-28,107)
   } else ctx.quadraticCurveTo(-44,45,-28,12)
   ctx.stroke()
@@ -124,7 +126,46 @@ function drawGorillaArms(player) {
 }
 
 function drawGorillaFace(player) {
+    //face
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.arc(0,63,9,0,2*Math.PI)
+    ctx.moveTo(-3.5,70)
+    ctx.arc(-3.5,70,4,0,2*Math.PI)
+    ctx.moveTo(3.5,70)
+    ctx.arc(3.5,70,4,0,2*Math.PI)
+    ctx.fill()
+    // eyes
+
+    ctx.fillStyle = 'blue'
+    ctx.beginPath()
+    ctx.arc(-3.5,70,2,0,2*Math.PI)
+    ctx.moveTo(3.5,70)
+    ctx.arc(3.5,70,2,0,2*Math.PI)
+    ctx.fill()
+    //nose
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 1.4
+    ctx.beginPath()
+    ctx.moveTo(-3.5,66.5)
+    ctx.lineTo(-1.5,65)
+    ctx.moveTo(3.5, 66.5)
+    ctx.lineTo(1.5,65)
+    ctx.stroke()
+    
+    //mouth
+    ctx.beginPath()
+    const isCelebrating = 
+            state.phase == 'celebrating' &&
+            state.currentPlayer == player
+    ctx.strokeStyle = isCelebrating ? 'red' : 'purple'
+    ctx.lineWidth = 1
   
+    
+    ctx.arc(0,isCelebrating ? 60 : 57, 2.5,0,Math.PI, isCelebrating ? true : false)
+    // ctx.quadraticCurveTo(0,60,10,50)
+  
+    ctx.stroke()
 }
 
 function generateBackgroundBuildingCoords(index) {
@@ -169,7 +210,7 @@ function generateBuildingCoords(index){
 
   state.buildings.push({x,width,height, lightsOn})
 }
-function initBombPosition(){}
+
 
 function drawBackground(){
   const gradient = ctx.createLinearGradient(0,0,0,window.innerHeight)
@@ -219,7 +260,7 @@ function drawBuildings(){
             const x = room * (windowWidth + gap)
             const y = floor * (windowHeight + gap)
 
-            ctx.fillStyle = 'red'
+            ctx.fillStyle = 'white'
             ctx.fillRect(x,y,windowWidth,windowHeight)
 
             ctx.restore()
@@ -229,5 +270,31 @@ function drawBuildings(){
 
   });  
 }
+function initBombPosition(){
+  const building = //determines whose turn it is to draw the bomb
+    state.currentPlayer == 1
+    ? state.buildings.at(1)
+    : state.buildings.at(-2)
 
-function drawBomb() {}
+    const gorillaX = building.x + building.width / 2
+    const gorillaY = building.height
+
+    const gorillaHandOffsetX = state.currentPlayer == 1 ? -28 : 28
+    const gorillaHandOffsetY = 107
+
+    state.bomb.x = gorillaX + gorillaHandOffsetX
+    state.bomb.y = gorillaY + gorillaHandOffsetY
+
+
+}
+function drawBomb() {
+  ctx.save()
+  ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
+
+  //draw bomb
+  ctx.fillStyle = 'goldenrod'
+  ctx.beginPath()
+  ctx.arc(3,7,8,0,2*Math.PI)
+  ctx.fill()
+  ctx.restore()
+}
