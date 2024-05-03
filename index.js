@@ -6,11 +6,7 @@ canvas.height = innerHeight
 
 const ctx = canvas.getContext('2d')
 
-// window.onresize = () => {
-//   canvas.width = innerWidth
-// canvas.height = innerHeight
 
-// }
 
 newGame() 
 
@@ -27,7 +23,8 @@ function newGame() {
   
     backgroundBuildings: [],
     buildings: [],
-    blastHoles: []
+    blastHoles: [],
+    scale: 1
   }
 
   //draws BG buildings
@@ -37,13 +34,18 @@ function newGame() {
   for (let i = 0; i < 8; i++) {
     generateBuildingCoords(i)
   }
-
+  calculateScale()
   initBombPosition()
 
   draw()
 }
 
 //note calling newGame also calls draw func
+
+function calculateScale() {
+  
+}
+
 function draw() {
   ctx.save()
   ctx.translate(0, window.innerHeight)
@@ -153,12 +155,13 @@ function drawGorillaFace(player) {
     
     //mouth
     ctx.beginPath()
-    const isCelebrating = state.phase == 'celebrating' && state.currentPlayer == player
+    const isCelebrating = 
+            state.phase == 'celebrating' &&
+            state.currentPlayer == player
     ctx.strokeStyle = isCelebrating ? 'red' : 'purple'
     ctx.lineWidth = 1
   
     
-
     ctx.arc(0,isCelebrating ? 60 : 57, 2.5,0,Math.PI, isCelebrating ? true : false)
     // ctx.quadraticCurveTo(0,60,10,50)
   
@@ -207,7 +210,7 @@ function generateBuildingCoords(index){
 
   state.buildings.push({x,width,height, lightsOn})
 }
-function initBombPosition(){}
+
 
 function drawBackground(){
   const gradient = ctx.createLinearGradient(0,0,0,window.innerHeight)
@@ -267,5 +270,31 @@ function drawBuildings(){
 
   });  
 }
+function initBombPosition(){
+  const building = //determines whose turn it is to draw the bomb
+    state.currentPlayer == 1
+    ? state.buildings.at(1)
+    : state.buildings.at(-2)
 
-function drawBomb() {}
+    const gorillaX = building.x + building.width / 2
+    const gorillaY = building.height
+
+    const gorillaHandOffsetX = state.currentPlayer == 1 ? -28 : 28
+    const gorillaHandOffsetY = 107
+
+    state.bomb.x = gorillaX + gorillaHandOffsetX
+    state.bomb.y = gorillaY + gorillaHandOffsetY
+
+
+}
+function drawBomb() {
+  ctx.save()
+  ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
+
+  //draw bomb
+  ctx.fillStyle = 'goldenrod'
+  ctx.beginPath()
+  ctx.arc(3,7,8,0,2*Math.PI)
+  ctx.fill()
+  ctx.restore()
+}
