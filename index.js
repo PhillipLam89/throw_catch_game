@@ -43,13 +43,17 @@ function newGame() {
 //note calling newGame also calls draw func
 
 function calculateScale() {
-  
+  const lastBldgOBJ = state.buildings.at(-1)
+  const totalWidthOfCity = lastBldgOBJ.x + lastBldgOBJ.width
+
+  state.scale = innerWidth / totalWidthOfCity
 }
 
 function draw() {
   ctx.save()
   ctx.translate(0, window.innerHeight)
   ctx.scale(1,-1)
+  ctx.scale(state.scale,state.scale) // scales will stack, so it works! 
 
   //draw scenes
   drawBackground()
@@ -178,8 +182,8 @@ function generateBackgroundBuildingCoords(index) {
   const maxWidth = 110
   const width = minWidth + Math.random() * (maxWidth-minWidth)
 
-  const minHeight = 95
-  const maxHeight = 350
+  const minHeight = 60
+  const maxHeight = 280
   const height = minHeight + Math.random()*(maxHeight-minHeight)
 
   state.backgroundBuildings.push({x,width,height})
@@ -292,7 +296,7 @@ function drawBomb() {
   ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
 
   //draw bomb
-  ctx.fillStyle = 'goldenrod'
+  ctx.fillStyle = 'aqua'
   ctx.beginPath()
   ctx.arc(3,7,8,0,2*Math.PI)
   ctx.fill()
