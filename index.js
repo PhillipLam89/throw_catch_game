@@ -6,7 +6,13 @@ canvas.height = innerHeight
 
 const ctx = canvas.getContext('2d')
 
-
+window.onresize = () => {
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+  calculateScale()
+  initBombPosition()
+  draw()
+}
 
 newGame() 
 
@@ -131,10 +137,9 @@ function drawGorillaArms(player) {
 
 function drawGorillaFace(player) {
     //face
-    ctx.fillStyle = 'white'
+    ctx.fillStyle= 'white'
     ctx.beginPath()
     ctx.arc(0,63,9,0,2*Math.PI)
-    ctx.moveTo(-3.5,70)
     ctx.arc(-3.5,70,4,0,2*Math.PI)
     ctx.moveTo(3.5,70)
     ctx.arc(3.5,70,4,0,2*Math.PI)
@@ -223,7 +228,7 @@ function drawBackground(){
 
   //draw sky
   ctx.fillStyle = gradient
-  ctx.fillRect(0,0,innerWidth,innerHeight)
+  ctx.fillRect(0,0,innerWidth / state.scale , innerHeight / state.scale)
 
   //Draw moon as circle
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
@@ -289,13 +294,14 @@ function initBombPosition(){
     state.bomb.x = gorillaX + gorillaHandOffsetX
     state.bomb.y = gorillaY + gorillaHandOffsetY
 
-
+    state.bomb.velocity.x = 0
+    state.bomb.velocity.y = 0
 }
 function drawBomb() {
   ctx.save()
   ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
 
-  //draw bomb
+  //draw bomb as cirfcle
   ctx.fillStyle = 'aqua'
   ctx.beginPath()
   ctx.arc(3,7,8,0,2*Math.PI)
