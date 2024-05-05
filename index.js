@@ -6,7 +6,13 @@ canvas.height = innerHeight
 
 const ctx = canvas.getContext('2d')
 
-
+window.onresize = () => {
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+  calculateScale()
+  initBombPosition()
+  draw()
+}
 
 newGame() 
 
@@ -43,13 +49,17 @@ function newGame() {
 //note calling newGame also calls draw func
 
 function calculateScale() {
-  
+  const lastBldgOBJ = state.buildings.at(-1)
+  const totalWidthOfCity = lastBldgOBJ.x + lastBldgOBJ.width
+
+  state.scale = innerWidth / totalWidthOfCity
 }
 
 function draw() {
   ctx.save()
   ctx.translate(0, window.innerHeight)
   ctx.scale(1,-1)
+  ctx.scale(state.scale,state.scale) // scales will stack, so it works! 
 
   //draw scenes
   drawBackground()
@@ -127,10 +137,9 @@ function drawGorillaArms(player) {
 
 function drawGorillaFace(player) {
     //face
-    ctx.fillStyle = 'white'
+    ctx.fillStyle= 'white'
     ctx.beginPath()
     ctx.arc(0,63,9,0,2*Math.PI)
-    ctx.moveTo(-3.5,70)
     ctx.arc(-3.5,70,4,0,2*Math.PI)
     ctx.moveTo(3.5,70)
     ctx.arc(3.5,70,4,0,2*Math.PI)
@@ -178,8 +187,8 @@ function generateBackgroundBuildingCoords(index) {
   const maxWidth = 110
   const width = minWidth + Math.random() * (maxWidth-minWidth)
 
-  const minHeight = 95
-  const maxHeight = 350
+  const minHeight = 60
+  const maxHeight = 280
   const height = minHeight + Math.random()*(maxHeight-minHeight)
 
   state.backgroundBuildings.push({x,width,height})
@@ -219,7 +228,7 @@ function drawBackground(){
 
   //draw sky
   ctx.fillStyle = gradient
-  ctx.fillRect(0,0,innerWidth,innerHeight)
+  ctx.fillRect(0,0,innerWidth / state.scale , innerHeight / state.scale)
 
   //Draw moon as circle
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
@@ -285,14 +294,15 @@ function initBombPosition(){
     state.bomb.x = gorillaX + gorillaHandOffsetX
     state.bomb.y = gorillaY + gorillaHandOffsetY
 
-
+    state.bomb.velocity.x = 0
+    state.bomb.velocity.y = 0
 }
 function drawBomb() {
   ctx.save()
   ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
 
-  //draw bomb
-  ctx.fillStyle = 'goldenrod'
+  //draw bomb as cirfcle
+  ctx.fillStyle = 'aqua'
   ctx.beginPath()
   ctx.arc(3,7,8,0,2*Math.PI)
   ctx.fill()
