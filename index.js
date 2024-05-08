@@ -4,8 +4,15 @@ const canvas = document.getElementById('game')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
-const ctx = canvas.getContext('2d')
+//panel infos
+const angle1DOM = document.querySelector('#info-left .angle')
+const velocity1DOM = document.querySelector('#info-left .velocity')
 
+const angle2DOM = document.querySelector('#info-right .angle')
+const velocity2DOM = document.querySelector('#info-right .velocity')
+
+
+const ctx = canvas.getContext('2d')
 window.onresize = () => {
   canvas.width = innerWidth
   canvas.height = innerHeight
@@ -50,7 +57,7 @@ function newGame() {
 
 function calculateScale() {
   const lastBldgOBJ = state.buildings.at(-1)
-  const totalWidthOfCity = lastBldgOBJ.x + lastBldgOBJ.width
+  const totalWidthOfCity = lastBldgOBJ.x + lastBldgOBJ.width + 150
 
   state.scale = innerWidth / totalWidthOfCity
 }
@@ -296,6 +303,14 @@ function initBombPosition(){
 
     state.bomb.velocity.x = 0
     state.bomb.velocity.y = 0
+
+    //move the HTML bomb grab area to proper position
+    const grabAreaRadius = 15
+    const left = state.bomb.x * state.scale - grabAreaRadius
+    const bottom = state.bomb.y * state.scale - grabAreaRadius
+
+    bombGrabAreaDOM.style.left = `${left}px`
+    bombGrabAreaDOM.style.bottom = `${bottom}px`
 }
 function drawBomb() {
   ctx.save()
