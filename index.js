@@ -32,7 +32,7 @@ bombGrabAreaDOM.onmousedown = (e) => {
     dragStartX = e.clientX
     dragStartY = e.clientY
 
-    document.body.style.curso = 'grabbing'
+    document.body.style.cursor = 'grabbing'
   }
 }
 
@@ -181,7 +181,7 @@ function drawGorillaArms(player) {
   const currentPlayerOne = state.currentPlayer == player
 
   if (isAiming && currentPlayerOne && player == 1) {
-    ctx.quadraticCurveTo(-44,63,-28,107)
+    ctx.quadraticCurveTo(-44,63,-28 - state.bomb.velocity.x / 6.25,107 - state.bomb.velocity.y / 6.25)
   }else if (isCelebrating && currentPlayerOne) {
     ctx.quadraticCurveTo(-44,63,-28,107)
   } else ctx.quadraticCurveTo(-44,45,-28,12)
@@ -190,7 +190,7 @@ function drawGorillaArms(player) {
 
   ctx.moveTo(14,50) //right arm
   if (isAiming && state.currentPlayer == 2 && player == 2) {
-    ctx.quadraticCurveTo(44,63,28,107)
+    ctx.quadraticCurveTo(44,63,28 - state.bomb.velocity.x / 6.25,107 - state.bomb.velocity.y / 6.25)
   }else if (isCelebrating && state.currentPlayer == player) {
     ctx.quadraticCurveTo(44,63,28,107)
   } else ctx.quadraticCurveTo(44,45,28,12)
@@ -295,7 +295,7 @@ function drawBackground(){
   //Draw moon as circle
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
   ctx.beginPath()
-  ctx.arc(canvas.width * .25,canvas.height * .75, 60,0, 2*Math.PI)
+  ctx.arc(canvas.width * .15,canvas.height * .65, 60,0, 2*Math.PI)
   ctx.fill()
 }
 
@@ -371,6 +371,9 @@ function drawBomb() {
   ctx.save()
   ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
 
+  if (state.phase == 'aiming') {
+    ctx.translate(-state.bomb.velocity.x / 6.25, -state.bomb.velocity.y / 6.25)
+  }
   //draw bomb as cirfcle
   ctx.fillStyle = 'aqua'
   ctx.beginPath()
