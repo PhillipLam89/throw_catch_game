@@ -21,11 +21,52 @@ window.onresize = () => {
   draw()
 }
 
+let isDragging = false
+let dragStartX = null
+let dragStartY = null
+
+
+bombGrabAreaDOM.onmousedown = (e) => {
+  if (state.phase == 'aiming') {
+    isDragging = true
+    dragStartX = e.clientX
+    dragStartY = e.clientY
+
+    document.body.style.curso = 'grabbing'
+  }
+}
+
+window.onmousemove = (e) => { //notice we put this event listener on window, to handle user dragging OUTSIDE the bomb grab area
+
+  if (isDragging) {
+    const deltaX = e.clientX - dragStartX //total change in distance between bomb grab area & left aim
+    const deltaY = e.clientY - dragStartY
+
+    state.bomb.velocity.x = -deltaX //we take the  opposite because the bomb will be thrown OPPOsite direction of the drag
+    state.bomb.velocity.y = deltaY
+
+    setInfo(deltaX, deltaY)
+    draw() // this repaints the gorillas left arm to follow the aiming of the bomb
+  }
+}
+
+window.onmouseup = () => {
+  if (isDragging) {
+    isDragging = false  
+    document.body.style.cursor = 'default'
+
+    throwBomb()
+  }
+}
+
+function throwBomb(){}
 newGame() 
+
+
 
 function newGame() {
   state = {
-    phase: "celebrating",
+    phase: "aiming",
     currentPlayer: 1,
     bomb: {
       x: null,
@@ -51,6 +92,20 @@ function newGame() {
   initBombPosition()
 
   draw()
+}
+
+function setInfo(deltaX, deltaY) {
+  const hypotenuse = Math.hypot(deltaX, deltaY)
+  const angleInRads = Math.asin(deltaX / hypotenuse) //JS Math only takes angles in rads
+  const angleInDegrees = angleInRads / Math.PI * 180  //degrees is useful to display in HTML
+ 
+  if (state.currentPlayer == 1) {
+    angle1DOM.innerText = ~~angleInDegrees
+    velocity1DOM.innerText = ~~hypotenuse
+  } else {
+    angle2DOM.innerText = ~~angleInDegrees
+    velocity2DOM.innerText = ~~hypotenuse    
+  }
 }
 
 //note calling newGame also calls draw func
