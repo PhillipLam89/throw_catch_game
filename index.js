@@ -33,6 +33,9 @@ bombGrabAreaDOM.onmousedown = (e) => {
     dragStartY = e.clientY
 
     document.body.style.cursor = 'grabbing'
+
+
+
   }
 }
 
@@ -59,7 +62,66 @@ window.onmouseup = () => {
   }
 }
 
-function throwBomb(){}
+let previousAnimationTimeStamp = null
+
+function throwBomb(){
+  state.phase = 'in flight'
+  previousAnimationTimeStamp = null
+  requestAnimationFrame(animate)
+}
+
+function moveBomb(elapsedTime) {
+  const multiplier = elapsedTime / 200
+
+  //adjust for gravity
+
+  state.bomb.velocity.y -= 20 * multiplier
+
+  //calculates new position
+  state.bomb.x+= state.bomb.velocity.x * multiplier
+  state.bomb.y+= state.bomb.velocity.y * multiplier
+}
+
+function animate(timeStamp) {
+  if (previousAnimationTimeStamp == null) { // this is for the 1st cycle since timeStamp would be null
+    previousAnimationTimeStamp = timeStamp
+    requestAnimationFrame(animate)
+    return
+  }
+  const elapsedTime = timeStamp - previousAnimationTimeStamp
+  moveBomb(elapsedTime)
+
+  //hit detection
+
+  const miss = checkFrameHit() || false
+  const hit = false
+
+  if (miss) { //handles case when we hit a bldg or bomb flies off-screen
+    state.currentPlayer = state.currentPlayer == 1 ? 2 : 1
+    state.phase = 'aiming'
+    initBombPosition()
+
+    draw()
+    return
+  }
+  if (hit) {
+    //blah blah
+    return
+  }
+  draw()
+  //continue animation
+  previousAnimationTimeStamp = timeStamp
+  requestAnimationFrame(animate)
+}
+
+function checkFrameHit() {
+  //stops throw animation if bomb gets out of bounds
+
+  const isOutOfBounds = (state.bomb.y < 0 || state.bomb.x < 0 || state.bomb.x > innerWidth / state.scale)
+  //notice we dont check if bomb is out of screen VERTICALLY UPWARDS, since gravity will force it back down
+  if (isOutOfBounds) return true
+}
+
 newGame() 
 
 
@@ -176,11 +238,12 @@ function drawGorillaArms(player) {
  
   ctx.moveTo(-14,50) //left arm
 
-  const isAiming = state.phase === 'aiming'
+  const isAiming = state.phase == 'aiming'
   const isCelebrating = state.phase == 'celebrating'
   const currentPlayerOne = state.currentPlayer == player
 
   if (isAiming && currentPlayerOne && player == 1) {
+    
     ctx.quadraticCurveTo(-44,63,-28 - state.bomb.velocity.x / 6.25,107 - state.bomb.velocity.y / 6.25)
   }else if (isCelebrating && currentPlayerOne) {
     ctx.quadraticCurveTo(-44,63,-28,107)
@@ -372,12 +435,35 @@ function drawBomb() {
   ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
 
   if (state.phase == 'aiming') {
-    ctx.translate(-state.bomb.velocity.x / 6.25, -state.bomb.velocity.y / 6.25)
+    ctx.translate(-state.bomb.velocity.x / 6.25, -state.bomb.velocity.y / 6.25) 
+    //draws bomb preview trajectory as dotted line when aiming
+    ctx.strokeStyle = 'white'
+    ctx.setLineDash([3,8])
+    ctx.lineWidth = 3
+    var bombRadius = 8
+    ctx.beginPath()
+    ctx.moveTo(0,bombRadius * 0.5) //4 is half of the bomb's radius so it starts in middle
+    ctx.lineTo(state.bomb.velocity.x, state.bomb.velocity.y)
+    ctx.stroke()
+
+      //draw bomb as circle
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.arc(3,7,bombRadius,0,2*Math.PI)
+    ctx.fill()
+
+  } else if (state.phase == 'in flight') {
+    //code below draws rotating half-circle bomb animation
+      ctx.fillStyle = 'white'
+      ctx.rotate(state.bomb.rotation)
+      ctx.beginPath()
   }
-  //draw bomb as cirfcle
-  ctx.fillStyle = 'aqua'
-  ctx.beginPath()
-  ctx.arc(3,7,8,0,2*Math.PI)
-  ctx.fill()
+
+
+
+
+
+
+   //restores our translate
   ctx.restore()
 }
