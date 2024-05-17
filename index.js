@@ -457,12 +457,15 @@ function drawBomb() {
       ctx.fillStyle = 'white'
       ctx.rotate(state.bomb.rotation)
       ctx.beginPath()
+      ctx.moveTo(-8,-2)
+      ctx.quadraticCurveTo(0,12,8,-2)
+      ctx.quadraticCurveTo(0,2,-8,-2)
+      ctx.fill()
+  } else {
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.arc(3,7,bombRadius,0,2*Math.PI)
   }
-
-
-
-
-
 
    //restores our translate
   ctx.restore()
