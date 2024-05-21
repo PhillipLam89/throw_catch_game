@@ -21,11 +21,117 @@ window.onresize = () => {
   draw()
 }
 
+let isDragging = false
+let dragStartX = null
+let dragStartY = null
+
+
+bombGrabAreaDOM.onmousedown = (e) => {
+  if (state.phase == 'aiming') {
+    isDragging = true
+    dragStartX = e.clientX
+    dragStartY = e.clientY
+
+    document.body.style.cursor = 'grabbing'
+
+
+
+  }
+}
+
+window.onmousemove = (e) => { //notice we put this event listener on window, to handle user dragging OUTSIDE the bomb grab area
+
+  if (isDragging) {
+    const deltaX = e.clientX - dragStartX //total change in distance between bomb grab area & left aim
+    const deltaY = e.clientY - dragStartY
+
+    state.bomb.velocity.x = -deltaX //we take the  opposite because the bomb will be thrown OPPOsite direction of the drag
+    state.bomb.velocity.y = deltaY
+
+    setInfo(deltaX, deltaY)
+    draw() // this repaints the gorillas left arm to follow the aiming of the bomb
+  }
+}
+
+window.onmouseup = () => {
+  if (isDragging) {
+    isDragging = false  
+    document.body.style.cursor = 'default'
+
+    throwBomb()
+  }
+}
+
+let previousAnimationTimeStamp = null
+
+function throwBomb(){
+  state.phase = 'in flight'
+  previousAnimationTimeStamp = null
+  requestAnimationFrame(animate)
+}
+
+function moveBomb(elapsedTime) {
+  const multiplier = elapsedTime / 200
+
+  //adjust for gravity
+
+  state.bomb.velocity.y -= 20 * multiplier
+
+  //calculates new position
+  state.bomb.x+= state.bomb.velocity.x * multiplier
+  state.bomb.y+= state.bomb.velocity.y * multiplier
+
+  const direction = state.currentPlayer == 1 ? -1 : 1
+  state.bomb.rotation+= direction * multiplier * 5
+}
+
+function animate(timeStamp) {
+  if (previousAnimationTimeStamp == null) { // this is for the 1st cycle since timeStamp would be null
+    previousAnimationTimeStamp = timeStamp
+    requestAnimationFrame(animate)
+    return
+  }
+  const elapsedTime = timeStamp - previousAnimationTimeStamp
+  moveBomb(elapsedTime)
+
+  //hit detection
+
+  const miss = checkFrameHit() || false
+  const hit = false
+
+  if (miss) { //handles case when we hit a bldg or bomb flies off-screen
+    state.currentPlayer = state.currentPlayer == 1 ? 2 : 1
+    state.phase = 'aiming'
+    initBombPosition()
+
+    draw()
+    return
+  }
+  if (hit) {
+    //blah blah
+    return
+  }
+  draw()
+  //continue animation
+  previousAnimationTimeStamp = timeStamp
+  requestAnimationFrame(animate)
+}
+
+function checkFrameHit() {
+  //stops throw animation if bomb gets out of bounds
+
+  const isOutOfBounds = (state.bomb.y < 0 || state.bomb.x < 0 || state.bomb.x > innerWidth / state.scale)
+  //notice we dont check if bomb is out of screen VERTICALLY UPWARDS, since gravity will force it back down
+  if (isOutOfBounds) return true
+}
+
 newGame() 
+
+
 
 function newGame() {
   state = {
-    phase: "celebrating",
+    phase: "aiming",
     currentPlayer: 1,
     bomb: {
       x: null,
@@ -51,6 +157,20 @@ function newGame() {
   initBombPosition()
 
   draw()
+}
+
+function setInfo(deltaX, deltaY) {
+  const hypotenuse = Math.hypot(deltaX, deltaY)
+  const angleInRads = Math.asin(deltaX / hypotenuse) //JS Math only takes angles in rads
+  const angleInDegrees = angleInRads / Math.PI * 180  //degrees is useful to display in HTML
+ 
+  if (state.currentPlayer == 1) {
+    angle1DOM.innerText = ~~angleInDegrees
+    velocity1DOM.innerText = ~~hypotenuse
+  } else {
+    angle2DOM.innerText = ~~angleInDegrees
+    velocity2DOM.innerText = ~~hypotenuse    
+  }
 }
 
 //note calling newGame also calls draw func
@@ -121,12 +241,13 @@ function drawGorillaArms(player) {
  
   ctx.moveTo(-14,50) //left arm
 
-  const isAiming = state.phase === 'aiming'
+  const isAiming = state.phase == 'aiming'
   const isCelebrating = state.phase == 'celebrating'
   const currentPlayerOne = state.currentPlayer == player
 
   if (isAiming && currentPlayerOne && player == 1) {
-    ctx.quadraticCurveTo(-44,63,-28,107)
+    
+    ctx.quadraticCurveTo(-44,63,-28 - state.bomb.velocity.x / 6.25,107 - state.bomb.velocity.y / 6.25)
   }else if (isCelebrating && currentPlayerOne) {
     ctx.quadraticCurveTo(-44,63,-28,107)
   } else ctx.quadraticCurveTo(-44,45,-28,12)
@@ -135,7 +256,7 @@ function drawGorillaArms(player) {
 
   ctx.moveTo(14,50) //right arm
   if (isAiming && state.currentPlayer == 2 && player == 2) {
-    ctx.quadraticCurveTo(44,63,28,107)
+    ctx.quadraticCurveTo(44,63,28 - state.bomb.velocity.x / 6.25,107 - state.bomb.velocity.y / 6.25)
   }else if (isCelebrating && state.currentPlayer == player) {
     ctx.quadraticCurveTo(44,63,28,107)
   } else ctx.quadraticCurveTo(44,45,28,12)
@@ -240,7 +361,7 @@ function drawBackground(){
   //Draw moon as circle
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
   ctx.beginPath()
-  ctx.arc(canvas.width * .25,canvas.height * .75, 60,0, 2*Math.PI)
+  ctx.arc(canvas.width * .15,canvas.height * .65, 60,0, 2*Math.PI)
   ctx.fill()
 }
 
@@ -303,6 +424,7 @@ function initBombPosition(){
 
     state.bomb.velocity.x = 0
     state.bomb.velocity.y = 0
+    state.bomb.rotation = 0 //reset state of bomb rotation back to default
 
     //move the HTML bomb grab area to proper position
     const grabAreaRadius = 15
@@ -316,10 +438,39 @@ function drawBomb() {
   ctx.save()
   ctx.translate(state.bomb.x, state.bomb.y) // moves 0,0 coordinates to the gorillas hand that is holding the bomb
 
-  //draw bomb as cirfcle
-  ctx.fillStyle = 'aqua'
-  ctx.beginPath()
-  ctx.arc(3,7,8,0,2*Math.PI)
-  ctx.fill()
+  if (state.phase == 'aiming') {
+    ctx.translate(-state.bomb.velocity.x / 6.25, -state.bomb.velocity.y / 6.25) 
+    //draws bomb preview trajectory as dotted line when aiming
+    ctx.strokeStyle = 'white'
+    ctx.setLineDash([3,8])
+    ctx.lineWidth = 3
+    var bombRadius = 8
+    ctx.beginPath()
+    ctx.moveTo(0,bombRadius * 0.5) //4 is half of the bomb's radius so it starts in middle
+    ctx.lineTo(state.bomb.velocity.x, state.bomb.velocity.y)
+    ctx.stroke()
+
+      //draw bomb as circle
+    ctx.fillStyle = 'white'
+    ctx.rotate(state.bomb.rotation)
+    ctx.beginPath()
+    ctx.arc(3,7,bombRadius,0,2*Math.PI)
+    ctx.fill()
+
+  } else if (state.phase == 'in flight') {
+    //code below draws rotating half-circle bomb animation
+      ctx.fillStyle = 'red'
+      ctx.rotate(state.bomb.rotation)
+      ctx.beginPath()
+      ctx.moveTo(-8,-2)
+      ctx.quadraticCurveTo(0,12,8,-2)
+      ctx.quadraticCurveTo(0,22,-8,-2)
+      ctx.fill()
+  } else {
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.arc(3,7,bombRadius,0,2*Math.PI)
+  }
+   //restores our translate
   ctx.restore()
 }
