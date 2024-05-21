@@ -80,6 +80,9 @@ function moveBomb(elapsedTime) {
   //calculates new position
   state.bomb.x+= state.bomb.velocity.x * multiplier
   state.bomb.y+= state.bomb.velocity.y * multiplier
+
+  const direction = state.currentPlayer == 1 ? -1 : 1
+  state.bomb.rotation+= direction * multiplier * 5
 }
 
 function animate(timeStamp) {
@@ -421,6 +424,7 @@ function initBombPosition(){
 
     state.bomb.velocity.x = 0
     state.bomb.velocity.y = 0
+    state.bomb.rotation = 0 //reset state of bomb rotation back to default
 
     //move the HTML bomb grab area to proper position
     const grabAreaRadius = 15
@@ -448,25 +452,25 @@ function drawBomb() {
 
       //draw bomb as circle
     ctx.fillStyle = 'white'
+    ctx.rotate(state.bomb.rotation)
     ctx.beginPath()
     ctx.arc(3,7,bombRadius,0,2*Math.PI)
     ctx.fill()
 
   } else if (state.phase == 'in flight') {
     //code below draws rotating half-circle bomb animation
-      ctx.fillStyle = 'white'
+      ctx.fillStyle = 'red'
       ctx.rotate(state.bomb.rotation)
       ctx.beginPath()
       ctx.moveTo(-8,-2)
       ctx.quadraticCurveTo(0,12,8,-2)
-      ctx.quadraticCurveTo(0,2,-8,-2)
+      ctx.quadraticCurveTo(0,22,-8,-2)
       ctx.fill()
   } else {
     ctx.fillStyle = 'white'
     ctx.beginPath()
     ctx.arc(3,7,bombRadius,0,2*Math.PI)
   }
-
    //restores our translate
   ctx.restore()
 }
